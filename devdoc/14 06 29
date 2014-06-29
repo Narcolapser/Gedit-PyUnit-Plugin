@@ -1,0 +1,5 @@
+There seems to be two problems. 
+
+Firstly there is one wrong with my system for importing tests. This is leading to a "issubclass argument 1 must be a class". So I need to work on the import system a little and get that smoothed out.
+
+Secondly I'm not handling my panel correctly. It seems that I'm trying to re-add my panel everytime. This is the cause of the error "You are trying to add an item with an id that already exists". So I need to create a instancing method that makes the panel only if its not been made already. Then I can call that to get the panel or make it if necessary. That will eliminate that error.

@@ -11,6 +11,7 @@ from gi.repository import GLib, Gio, GObject, Gtk, Gedit, PeasGtk
 import inspect
 import imp
 import unittest
+import traceback
 
 # Bug 668924 - Make gedit_debug_message() introspectable <https://bugzilla.gnome.org/show_bug.cgi?id=668924>
 try:
@@ -28,6 +29,16 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 
 	def __init__(self):
 		GObject.Object.__init__(self)
+		
+		#Prepare the output panel.
+		self.ga = Gedit.App.get_default()
+		self.window = self.ga.get_active_window()
+		self.iconPassed = Gtk.Image.new_from_stock(Gtk.STOCK_YES, Gtk.IconSize.MENU)
+		self.iconFailed = Gtk.Image.new_from_stock(Gtk.STOCK_STOP, Gtk.IconSize.MENU)
+		self.output_label = Gtk.Label('Results form PyUnit will display here.')
+		self.panel = self.window.get_bottom_panel()
+		self.panel.add_item(self.output_label,
+			"PyUnitResultsPanel", "PyUnit Results", self.iconFailed)
 
 	def __del__(self):
 		pass
@@ -39,15 +50,8 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 		if not hasattr(doc, "saved_handler_id"):
 			doc.saved_handler_id = doc.connect("saved", self.__on_document_saved)
 		
-		#Prepare the output panel.
-		self.ga = Gedit.App.get_default()
-		self.window = self.ga.get_active_window()
-		self.iconPassed = Gtk.Image.new_from_stock(Gtk.STOCK_YES, Gtk.IconSize.MENU)
-		self.iconFailed = Gtk.Image.new_from_stock(Gtk.STOCK_STOP, Gtk.IconSize.MENU)
-		self.output_label = Gtk.Label('Results form PyUnit will display here.')
-		self.panel = self.window.get_bottom_panel()
-		self.panel.add_item(self.output_label,
-			"PyUnitResultsPanel", "PyUnit Results", self.iconFailed)
+
+
 
 	def do_deactivate(self):
 		"""Disconnect from the document's 'saved' signals."""
@@ -75,7 +79,8 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 			#res = str(results)
 			res = 'DONE!'
 		except Exception as e:
-			res = 'testing did not happen: ' + str(e)
+			#res = 'testing did not happen: ' + str(e)
+			res = traceback.print_exc()
 		
 		self.__update_panel(Gtk.Label(res),True)
 	
