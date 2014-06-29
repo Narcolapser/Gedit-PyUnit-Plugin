@@ -20,3 +20,5 @@ Road map:
 	0.4:
 		multi-thread the test process to keep Gedit responsive.
 		provide live updates on test progress.
+	0.5:
+		test template generation

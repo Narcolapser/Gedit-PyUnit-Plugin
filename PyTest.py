@@ -7,19 +7,10 @@
 #		extending my use of gedit as an IDE.
 #################################################
 
-#TODO:
-#	Re-create the testing system so that we don't have to reroute stderr to get results.
-#	Multi thread the test process so that gedit stays responsive.
-#	Maybe better format the output. we'll see.
-#	Configuration management so that the plugin can be easily altered to user specific work flow
-#		perhaps have a simple pop up or something in the status bar so the bottom panel
-#		doesn't have to be open to see if the program passed it's tests or not.
-#	Know that if you are in "test_vector.py" you should be running "test_vector.py" against 
-#		"vector.py" and not "test_test_vectory.py" against "test_vector.py"
-
 from gi.repository import GLib, Gio, GObject, Gtk, Gedit, PeasGtk
 import inspect
-import subprocess
+import imp
+import unittest
 
 # Bug 668924 - Make gedit_debug_message() introspectable <https://bugzilla.gnome.org/show_bug.cgi?id=668924>
 try:
@@ -30,20 +21,16 @@ except:
 		Gedit.debug(Gedit.DebugSection.DEBUG_PLUGINS, filename, lineno, func_name)
 
 
-class PyUnitPlugin(GObject.Object, 
-		Gedit.ViewActivatable, PeasGtk.Configurable):
+class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 	__gtype_name__ = "PyTest"
 #	settings = Gio.Settings.new("org.gnome.gedit.plugins.PyTest")
 	view = GObject.property(type = Gedit.View)
-	window = GObject.property(type=Gedit.Window)
 
 	def __init__(self):
 		GObject.Object.__init__(self)
 
-		debug_plugin_message("self = %r", self)
-
 	def __del__(self):
-		debug_plugin_message("self = %r", self)
+		pass
 
 	def do_activate(self):
 		"""Connect to the document's 'saved' signals."""
@@ -79,14 +66,33 @@ class PyUnitPlugin(GObject.Object,
 		fileName = fileLocation[1+fileLocation.rindex('/'):]
 		filePath = fileLocation[:fileLocation.rindex('/')+1]
 		moduleName = fileName[:fileName.index('.py')]
+		
 		try:
-			res = subprocess.check_output('python "' + filePath+'test_'+fileName + '" 2>&1',shell=True)
-			if not isinstance(res,str):
-				res = res.decode('utf-8')
+			module = self.__load_module(moduleName,filePath)
+			suite = self.__load_suite(module)
+			#results = unittest.Test_Result()
+			#suite.run(results)
+			#res = str(results)
+			res = 'DONE!'
 		except Exception as e:
 			res = 'testing did not happen: ' + str(e)
 		
 		self.__update_panel(Gtk.Label(res),True)
+	
+	def __load_module(self,name,path):
+		magic = imp.find_module(name,[path])
+		module = imp.load_module(name,magic[0],magic[1],magic[2])
+		return module
+	
+	def __load_suite(self,module):
+		return unittest.TestLoader().loadTestsFromTestCase(self.__find_tests(module))
+		
+	def __find_tests(self,module):
+		testCases = []
+		for a in dir(module):
+			if 'setUp' in dir(a):
+				testCases.append(a)
+		return testCases
 	
 	def __update_panel(self,newLabel,status):
 		self.panel.remove_item(self.output_label)
