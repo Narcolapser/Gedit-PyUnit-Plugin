@@ -12,7 +12,7 @@ now ever time you save, the tests in test_yourClass.py will be run. This however
 Road map:
 	0.2:
 		Make the system for running unit tests not as picky.
-		Make the system aware of whether you are edit the class or it's tests.
+		Make the system aware of whether you are editing the class or it's tests.
 	0.3:
 		Provide simple output in status bar for test pass/fail status.
 		Format the output to something more useful.

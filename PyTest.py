@@ -37,7 +37,7 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 		self.iconFailed = Gtk.Image.new_from_stock(Gtk.STOCK_STOP, Gtk.IconSize.MENU)
 		self.output_label = Gtk.Label('Results form PyUnit will display here.')
 		self.panel = self.window.get_bottom_panel()
-		self.panel.add_item(self.output_label,
+		self.tab = self.panel.add_item(self.output_label,
 			"PyUnitResultsPanel", "PyUnit Results", self.iconFailed)
 
 	def __del__(self):
@@ -73,14 +73,15 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 		
 		try:
 			module = self.__load_module(moduleName,filePath)
-			suite = self.__load_suite(module)
-			#results = unittest.Test_Result()
-			#suite.run(results)
-			#res = str(results)
-			res = 'DONE!'
+			#suite = self.__load_suite(module)
+			suite = self.__load_suite(filePath)
+			results = unittest.TestResult()
+			suite.run(results)
+			res = str(results)
+			#res = 'DONE!'
 		except Exception as e:
-			#res = 'testing did not happen: ' + str(e)
-			res = traceback.print_exc()
+			res = 'testing did not happen: ' + str(e)
+			traceback.print_exc()
 		
 		self.__update_panel(Gtk.Label(res),True)
 	
@@ -89,8 +90,9 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 		module = imp.load_module(name,magic[0],magic[1],magic[2])
 		return module
 	
-	def __load_suite(self,module):
-		return unittest.TestLoader().loadTestsFromTestCase(self.__find_tests(module))
+	def __load_suite(self,filePath):
+		#return unittest.TestLoader().loadTestsFromTestCase(self.__find_tests(module))
+		return unittest.defaultTestLoader.discover(filePath)
 		
 	def __find_tests(self,module):
 		testCases = []

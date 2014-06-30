@@ -1,0 +1,5 @@
+I've fixed the importing of tests. Woohoo! That is pleasing. I've not fixed the problem with the Gedit bottom panel. But I may have to ask the internet for help on that one. 
+
+Text to do on the testing front is the formatting of the out put. Right now I just get a string that says 6 tests were run, and 3 failed. Not the most helpful output. Also the panel has a green check even though it failed the tests. I must fix that. But that will come I think with learning how to format test output. But I think that is beyond this evening's coding session. Time for my harp and then bed.
+
+As another note, I just glanced at the road map. I need to fix the pluggin so it knows whether you are currently editing a program or its tests. I want to do that next. Then I will have finished the 0.2 version of this pluggin. 
