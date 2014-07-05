@@ -12,6 +12,7 @@ import inspect
 import imp
 import unittest
 import traceback
+import threading
 
 # Bug 668924 - Make gedit_debug_message() introspectable <https://bugzilla.gnome.org/show_bug.cgi?id=668924>
 try:
@@ -76,14 +77,18 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 			#suite = self.__load_suite(module)
 			suite = self.__load_suite(filePath)
 			results = unittest.TestResult()
-			suite.run(results)
-			res = str(results)
+			testLock = threading.Event()
+			t = threading.Thread(target=self.__async_test,args=(suite,results,testLock))
+			t.start()
+			uthread = threading.Thread(
+				target=self.__async_update_panel,args=(results,True,testLock))
+			uthread.start()
 			#res = 'DONE!'
 		except Exception as e:
 			res = 'testing did not happen: ' + str(e)
 			traceback.print_exc()
+			self.__update_panel(Gtk.Label(res),True)
 		
-		self.__update_panel(Gtk.Label(res),True)
 	
 	def __load_module(self,name,path):
 		magic = imp.find_module(name,[path])
@@ -101,6 +106,19 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 				testCases.append(a)
 		return testCases
 	
+	def __async_test(self,suite,results,lock):
+		suite.run(results)
+		lock.set()
+
+	def __async_update_panel(self,results,status,lock):
+		lock.wait(60)
+		if lock.isSet():
+			res = str(results)
+		else:
+			res = 'Test response timed out.'
+		
+		self.__update_panel(Gtk.Label(res),True)
+
 	def __update_panel(self,newLabel,status):
 		self.panel.remove_item(self.output_label)
 		self.output_label = newLabel

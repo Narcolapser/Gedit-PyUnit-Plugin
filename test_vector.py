@@ -15,7 +15,7 @@ class TestVector (unittest.TestCase):
 		v5 = Vector(0,0)
 		v5.x = 5
 		v5.y = 5
-		self.assertEqual(v5,self.vec5)
+		#self.assertEqual(v5,self.vec5)
 		self.assertTrue(v5 == self.vec5)
 		self.assertTrue((v5 == self.vec1) is False)
 	
@@ -41,8 +41,8 @@ class TestVector (unittest.TestCase):
 		self.assertEqual(self.vecu.dot(self.veci),32)
 	
 	def test_str(self):
+		time.sleep(10)
 		self.assertEqual(str("{'y': 5, 'x': 5}"),str(self.vec5))
-		#time.sleep(10)
 
 
 if __name__ == '__main__':
