@@ -41,7 +41,7 @@ class TestVector (unittest.TestCase):
 		self.assertEqual(self.vecu.dot(self.veci),32)
 	
 	def test_str(self):
-		time.sleep(10)
+		#time.sleep(10)
 		self.assertEqual(str("{'y': 5, 'x': 5}"),str(self.vec5))
 
 

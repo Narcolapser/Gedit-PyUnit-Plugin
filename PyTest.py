@@ -77,12 +77,19 @@ class PyUnitPlugin(GObject.Object, Gedit.ViewActivatable, PeasGtk.Configurable):
 			#suite = self.__load_suite(module)
 			suite = self.__load_suite(filePath)
 			results = unittest.TestResult()
-			testLock = threading.Event()
-			t = threading.Thread(target=self.__async_test,args=(suite,results,testLock))
-			t.start()
-			uthread = threading.Thread(
-				target=self.__async_update_panel,args=(results,True,testLock))
-			uthread.start()
+
+			##The single threaded version of this pluggin, mostly for debugging.
+			suite.run(results)
+			res = str(results)
+			self.__update_panel(Gtk.Label(res),True)
+
+			##The threaded version of this pluggin
+#			testLock = threading.Event()
+#			t = threading.Thread(target=self.__async_test,args=(suite,results,testLock))
+#			t.start()
+#			uthread = threading.Thread(
+#				target=self.__async_update_panel,args=(results,True,testLock))
+#			uthread.start()
 			#res = 'DONE!'
 		except Exception as e:
 			res = 'testing did not happen: ' + str(e)

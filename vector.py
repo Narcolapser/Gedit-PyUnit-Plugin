@@ -24,4 +24,4 @@ class Vector (object):
 		return (self.x-val.x)**2+(self.y-val.y)**2
 	
 	def __str__(self):
-		return str({'x':self.x,'y':self.y})#
+		return str({'x':self.x,'y':self.y})#f
